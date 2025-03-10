@@ -1,6 +1,7 @@
 import sqlite3
 from db import get_connection
 from utils import clear_screen
+from tabulate import tabulate
 
 
 def tambah_produk():
@@ -12,11 +13,13 @@ def tambah_produk():
 
     conn = sqlite3.connect("kasir.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO produk (nama, merk, kode, harga, satuan) VALUES (?, ?, ?, ?, ?)",
-                   (nama, merk, kode, harga, satuan))
+    cursor.execute(
+        "INSERT INTO produk (nama, merk, kode, harga, satuan) VALUES (?, ?, ?, ?, ?)",
+        (nama, merk, kode, harga, satuan),
+    )
     conn.commit()
     conn.close()
-    print("\nOK, Produk baru berhasil ditambahkan!")
+    print("\n ✅ Produk baru berhasil ditambahkan!")
 
 
 def lihat_produk():
@@ -27,137 +30,103 @@ def lihat_produk():
     produk = cursor.fetchall()
     conn.close()
 
-    print("\n================= DATA PRODUK =========================")
-    for p in produk:
-        print(f"{p[0]}. {p[1]} - {p[2]} - {p[3]} - Rp.{p[4]} per {p[5]}")
-
-    print("\nData produk masih kosong")
+    if produk:
+        print("\n 📦 DATA PRODUK 📦")
+        print(
+            tabulate(
+                produk,
+                headers=["ID", "Nama", "Merk", "Kode", "Harga", "Satuan"],
+                tablefmt="grid",
+            )
+        )
+    else:
+        print(" ⚠️ Tidak ada produk dalam database.")
 
 
 def cari_produk():
     clear_screen()
-    lihat_produk()
-    keyword = input("\nMasukkan nama / merk / kode produk yang ingin dicari: ")
-    conn = sqlite3.connect("kasir.db")
+    keyword = input("\nMasukkan nama, merk, atau kode produk yang ingin dicari: ")
+
+    conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM produk WHERE nama LIKE ? OR merk LIKE ? OR kode LIKE ?",
-                   (f"%{keyword}%", f"%{keyword}%", f"%{keyword}%"))
+    cursor.execute(
+        "SELECT * FROM produk WHERE nama LIKE ? OR merk LIKE ? OR kode LIKE ?",
+        (f"%{keyword}%", f"%{keyword}%", f"%{keyword}%"),
+    )
     produk = cursor.fetchall()
     conn.close()
 
     if produk:
-        print("\nProduk ditemukan:")
-        for p in produk:
-            print(f"{p[0]}. {p[1]} - {p[2]} - {p[3]} - Rp.{p[4]} per {p[5]}")
+        print("\n🔎 Produk ditemukan:")
+        print(
+            tabulate(
+                produk,
+                headers=["ID", "Nama", "Merk", "Kode", "Harga", "Satuan"],
+                tablefmt="grid",
+            )
+        )
     else:
-        print("\nProduk tidak ditemukan")
+        print("\n❌ Produk tidak ditemukan.")
 
 
 def edit_produk():
     clear_screen()
-    lihat_produk()
-    keyword = input(
-        "\nMasukkan nama, merk, atau kode produk yang ingin diedit: ")
-    conn = sqlite3.connect("kasir.db")
+    cari_produk()
+    kode = input("\nMasukkan kode produk yang ingin diedit: ")
+
+    conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM produk WHERE nama LIKE ? OR merk LIKE ? OR kode LIKE ?",
-                   (f"%{keyword}%", f"%{keyword}%", f"%{keyword}%"))
-    produk = cursor.fetchall()
+    cursor.execute("SELECT * FROM produk WHERE kode = ?", (kode,))
+    produk = cursor.fetchone()
 
     if not produk:
-        print("\nProduk tidak ditemukan.")
+        print("\n❌ Produk tidak ditemukan.")
         conn.close()
         return
-
-    # Jika lebih dari satu hasil ditemukan, tampilkan daftar untuk dipilih
-    if len(produk) > 1:
-        print("\nBeberapa produk ditemukan:")
-        for idx, p in enumerate(produk, start=1):
-            print(f"{idx}. {p[1]} - {p[2]} - {p[3]} - Rp.{p[4]} per {p[5]}")
-
-        pilihan = input("\nPilih nomor produk yang ingin diedit: ")
-        if not pilihan.isdigit() or int(pilihan) < 1 or int(pilihan) > len(produk):
-            print("\nPilihan tidak valid.")
-            conn.close()
-            return
-        produk = produk[int(pilihan) - 1]
-    else:
-        produk = produk[0]
 
     # Input data baru (bisa dikosongkan untuk mempertahankan nilai lama)
     nama_baru = input(f"Nama baru ({produk[1]}): ") or produk[1]
     merk_baru = input(f"Merk baru ({produk[2]}): ") or produk[2]
-    harga_baru = input(f"Harga baru ({produk[4]}): ")
+    harga_baru = input(f"Harga baru ({produk[4]}): ") or produk[4]
     satuan_baru = input(f"Satuan baru ({produk[5]}): ") or produk[5]
 
-    harga_baru = float(harga_baru) if harga_baru else produk[4]
-
-    cursor.execute("UPDATE produk SET nama = ?, merk = ?, harga = ?, satuan = ? WHERE kode = ?",
-                   (nama_baru, merk_baru, harga_baru, satuan_baru, produk[3]))
+    cursor.execute(
+        "UPDATE produk SET nama = ?, merk = ?, harga = ?, satuan = ? WHERE kode = ?",
+        (nama_baru, merk_baru, harga_baru, satuan_baru, kode),
+    )
     conn.commit()
     conn.close()
-    print("\nProduk berhasil diperbarui.")
+
+    print("\n✅ Produk berhasil diperbarui.")
 
 
 def hapus_produk():
     clear_screen()
-    lihat_produk()
-    keyword = input(
-        "\nMasukkan nama, merk, atau kode produk yang ingin dihapus: ")
+    cari_produk()
+    kode = input("\nMasukkan kode produk yang ingin dihapus: ")
 
-    conn = sqlite3.connect("kasir.db")
+    conn = get_connection()
     cursor = conn.cursor()
-
-    # Cari produk berdasarkan keyword
-    cursor.execute("SELECT * FROM produk WHERE nama LIKE ? OR merk LIKE ? OR kode LIKE ?",
-                   (f"%{keyword}%", f"%{keyword}%", f"%{keyword}%"))
-    produk = cursor.fetchall()
+    cursor.execute("SELECT * FROM produk WHERE kode = ?", (kode,))
+    produk = cursor.fetchone()
 
     if not produk:
-        print("\nProduk tidak ditemukan.")
+        print("\n❌ Produk tidak ditemukan.")
         conn.close()
         return
 
-    # Jika lebih dari satu produk ditemukan, admin bisa memilih mana yang akan dihapus
-    if len(produk) > 1:
-        print("\nBeberapa produk ditemukan:")
-        for idx, p in enumerate(produk, start=1):
-            print(f"{idx}. {p[1]} - {p[2]} - {p[3]} - Rp.{p[4]} per {p[5]}")
-
-        pilihan = input("\nPilih nomor produk yang ingin dihapus: ")
-        if not pilihan.isdigit() or int(pilihan) < 1 or int(pilihan) > len(produk):
-            print("\nPilihan tidak valid.")
-            conn.close()
-            return
-        produk = produk[int(pilihan) - 1]
-    else:
-        produk = produk[0]
-
-    # Konfirmasi penghapusan
-    confirm = input(f"\nApakah Anda yakin ingin menghapus {
-                    produk[1]} (Y/N)? ").strip().lower()
-    if confirm != 'y':
-        print("\nPenghapusan dibatalkan.")
+    confirm = (
+        input(f"\nApakah Anda yakin ingin menghapus {produk[1]} (Y/N)? ")
+        .strip()
+        .lower()
+    )
+    if confirm != "y":
+        print("\nHapus produk dibatalkan.")
         conn.close()
         return
 
-    # Hapus produk dari database
-    cursor.execute("DELETE FROM produk WHERE kode = ?", (produk[3],))
-    conn.commit()
-
-    # Reset ID agar tetap berurutan
-    cursor.execute("SELECT * FROM produk ORDER BY id ASC")
-    produk_tersisa = cursor.fetchall()
-
-    cursor.execute("DELETE FROM produk")  # Kosongkan tabel
-    # Reset autoincrement
-    cursor.execute("DELETE FROM sqlite_sequence WHERE name='produk'")
-
-    # Masukkan ulang data dengan ID baru
-    for idx, p in enumerate(produk_tersisa, start=1):
-        cursor.execute("INSERT INTO produk (id, nama, merk, kode, harga, satuan) VALUES (?, ?, ?, ?, ?, ?)",
-                       (idx, p[1], p[2], p[3], p[4], p[5]))
-
+    cursor.execute("DELETE FROM produk WHERE kode = ?", (kode,))
     conn.commit()
     conn.close()
-    print("\nProduk berhasil dihapus dan nomor ID telah diperbarui.")
+
+    print("\n✅ Produk berhasil dihapus.")
