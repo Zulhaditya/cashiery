@@ -24,5 +24,21 @@ def init_db():
             stok INT NOT NULL
         )
     ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS transaksi(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            kode_produk TEXT NOT NULL,
+            jumlah INTEGER NOT NULL,
+            total_harga FLOAT NOT NULL,
+            tanggal DATETIME DEFAULT CURRENT_TIMESTAMP,
+            tipe_transaksi TEXT CHECK(tipe_transaksi IN ('penjualan', 'pembelian')) NOT NULL,
+            pelanggan TEXT,
+            kasir TEXT,
+            metode_pembayaran TEXT,
+            keterangan TEXT,
+            FOREIGN KEY (kode_produk) REFERENCES produk(kode) ON DELETE CASCADE
+        )
+    ''')
     conn.commit()
     conn.close()
