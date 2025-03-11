@@ -7,7 +7,9 @@ from utils import clear_screen
 def menu():
     clear_screen()
     while True:
-        print("\n================ SELAMAT DATANG DI APLIKASI KASIR ======================")
+        print(
+            "\n================ SELAMAT DATANG DI APLIKASI KASIR ======================"
+        )
         print("\nPilihan:")
         print("1. Tambahkan Produk")
         print("2. Lihat Produk")
@@ -18,17 +20,17 @@ def menu():
 
         pilihan = input("\nPilih [1/2/3/4/5/6]: ")
 
-        if pilihan == '1':
+        if pilihan == "1":
             tambah_produk()
-        elif pilihan == '2':
+        elif pilihan == "2":
             lihat_produk()
-        elif pilihan == '3':
+        elif pilihan == "3":
             cari_produk()
-        elif pilihan == '4':
+        elif pilihan == "4":
             edit_produk()
-        elif pilihan == '5':
+        elif pilihan == "5":
             hapus_produk()
-        elif pilihan == '6':
+        elif pilihan == "6":
             print("\nKeluar dari aplikasi ...")
             sys.exit()
         else:

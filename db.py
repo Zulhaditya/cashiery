@@ -20,7 +20,8 @@ def init_db():
             merk TEXT NOT NULL,
             kode TEXT UNIQUE NOT NULL,
             harga FLOAT NOT NULL,
-            satuan TEXT NOT NULL
+            satuan TEXT NOT NULL,
+            stok INT NOT NULL
         )
     ''')
     conn.commit()
