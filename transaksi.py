@@ -5,8 +5,7 @@ from produk import lihat_produk
 
 
 def cari_produk(keyword):
-    clear_screen()
-    keyword = input("\nMasukkan nama, merk, atau kode produk yang ingin dicari: ")
+    # clear_screen()
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -23,7 +22,7 @@ def cari_produk(keyword):
 def transaksi():
     clear_screen()
     lihat_produk()
-    print("============ TRANSAKSI ===============")
+    print("===================== TRANSAKSI =====================")
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -33,7 +32,7 @@ def transaksi():
 
     while True:
         keyword = input(
-            "\nMasukkan kode, nama, atau merk produk (atau ketik 'ok' untuk mengakhiri transaksi): "
+            "\nCari kode, nama, atau merk produk (atau ketik 'ok' untuk mengakhiri transaksi): "
         ).strip()
         if keyword.lower() == "ok":
             break
@@ -53,14 +52,16 @@ def transaksi():
             )
         )
 
-        kode_produk = input("\nMasukkan kode produk yang dibeli: ").strip()
+        kode_produk = input(
+            "\nMasukkan nama / merk / kode produk yang dibeli: "
+        ).strip()
         jumlah = int(input("Masukkan jumlah: "))
 
         # Cek apakah produk ada & stok cukup
         produk = next((p for p in hasil_pencarian if p[3] == kode_produk), None)
 
         if not produk:
-            print("\n Kode produk tidak valid, coba lagi!")
+            print("\n Produk tidak ditemukan, coba lagi!")
             continue
 
         if produk[6] < jumlah:
@@ -81,7 +82,7 @@ def transaksi():
         return
 
     # Menampilkan ringkasan transaksi sebelum dikonfirmasi
-    print("\n📜 Ringkasan Transaksi 📜")
+    print("\n📜 Ringkasan Transaksi")
     print(
         tabulate(
             daftar_produk,
