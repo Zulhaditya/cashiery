@@ -16,7 +16,8 @@ with open(csv_file, newline="", encoding="utf-8") as csvfile:
         kode_barcode = int(row["Kode_Barcode"])  # Pastikan Kode_Barcode adalah integer
         nama_produk = row["Nama_Produk"]
         kategori = None  # Kolom kosong
-        harga = None  # Kolom kosong
+        harga_modal = None
+        harga_jual = None  # Kolom kosong
         satuan = None  # Kolom kosong
         stok = None  # Kolom kosong
 
@@ -28,10 +29,18 @@ with open(csv_file, newline="", encoding="utf-8") as csvfile:
             # Jika belum ada, masukkan data ke tabel produk
             cursor.execute(
                 """
-                INSERT INTO produk (kode_barcode, nama, kategori, harga, satuan, stok)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO produk (kode_barcode, nama, kategori, harga_modal, harga_jual, satuan, stok)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
-                (kode_barcode, nama_produk, kategori, harga, satuan, stok),
+                (
+                    kode_barcode,
+                    nama_produk,
+                    kategori,
+                    harga_modal,
+                    harga_jual,
+                    satuan,
+                    stok,
+                ),
             )
         else:
             print(f"Data dengan kode_barcode {kode_barcode} sudah ada, dilewati.")

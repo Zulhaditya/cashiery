@@ -9,15 +9,16 @@ def tambah_produk():
     nama = input("\nNama produk: ")
     kode_barcode = input("Kode Barcode: ")
     kategori = input("Kategori Produk: ")
-    harga = float(input("Harga produk: "))
+    harga_modal = float(input("Harga modal: "))
+    harga_jual = float(input("Harga jual: "))
     satuan = input("Satuan produk: ")
     stok = input("Stok produk: ")
 
     conn = sqlite3.connect("kasir.db")
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO produk (kode_barcode, nama, kategori, harga, satuan, stok) VALUES (?, ?, ?, ?, ?, ?)",
-        (kode_barcode, nama, kategori, harga, satuan, stok),
+        "INSERT INTO produk (kode_barcode, nama, kategori, harga_modal, harga_jual, satuan, stok) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (kode_barcode, nama, kategori, harga_modal, harga_jual, satuan, stok),
     )
     conn.commit()
     conn.close()
@@ -37,7 +38,7 @@ def lihat_produk():
         print(
             tabulate(
                 produk,
-                headers=["Kode Barcode", "Nama", "Kategori", "Harga", "Satuan", "Stok"],
+                headers=["Kode Barcode", "Nama", "Kategori", "Harga Modal", "Harga Jual", "Satuan", "Stok"],
                 tablefmt="fancy_grid",
                 numalign="right",
                 stralign="center"
@@ -65,7 +66,7 @@ def cari_produk():
         print(
             tabulate(
                 produk,
-                headers=["Kode Barcode", "Nama", "Kategori", "Harga", "Satuan", "Stok"],
+                headers=["Kode Barcode", "Nama", "Kategori", "Harga Modal", "Harga Jual", "Satuan", "Stok"],
                 tablefmt="fancy_grid",
                 numalign="right",
                 stralign="center"

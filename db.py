@@ -20,7 +20,8 @@ def init_db():
             kode_barcode INTEGER PRIMARY KEY,
             nama TEXT NOT NULL,
             kategori TEXT,
-            harga FLOAT,
+            harga_modal FLOAT,
+            harga_jual FLOAT,
             satuan TEXT,
             stok INT
         )
