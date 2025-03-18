@@ -10,7 +10,7 @@ def cari_produk(keyword):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT * FROM produk WHERE nama LIKE ? OR merk LIKE ? OR kode LIKE ?",
+        "SELECT * FROM produk WHERE nama LIKE ? OR merk LIKE ? OR kode_barcode LIKE ?",
         (f"%{keyword}%", f"%{keyword}%", f"%{keyword}%"),
     )
     produk = cursor.fetchall()
@@ -32,7 +32,7 @@ def transaksi():
 
     while True:
         keyword = input(
-            "\nCari kode, nama, atau merk produk (atau ketik 'ok' untuk mengakhiri transaksi): "
+            "\nCari barcode, nama, atau merk produk (atau ketik 'ok' untuk mengakhiri transaksi): "
         ).strip()
         if keyword.lower() == "ok":
             break
@@ -47,13 +47,13 @@ def transaksi():
         print(
             tabulate(
                 hasil_pencarian,
-                headers=["ID", "Nama", "Merk", "Kode", "Harga", "Satuan", "Stok"],
+                headers=["Kode Barcode", "Nama", "Kategori", "Harga", "Satuan", "Stok"],
                 tablefmt="grid",
             )
         )
 
         kode_produk = input(
-            "\nMasukkan nama / merk / kode produk yang dibeli: "
+            "\nMasukkan nama / merk / barcode produk yang dibeli: "
         ).strip()
         jumlah = int(input("Masukkan jumlah: "))
 
@@ -160,7 +160,7 @@ def riwayat_transaksi():
             "Kasir",
             "Metode",
         ]
-        print("\n📜 RIWAYAT TRANSAKSI 📜")
+        print("\n📜 RIWAYAT TRANSAKSI")
         print(
             tabulate(
                 transaksi,

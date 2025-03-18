@@ -17,13 +17,12 @@ def init_db():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS produk(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            kode_barcode INTEGER PRIMARY KEY,
             nama TEXT NOT NULL,
-            merk TEXT NOT NULL,
-            kode TEXT UNIQUE NOT NULL,
-            harga FLOAT NOT NULL,
-            satuan TEXT NOT NULL,
-            stok INT NOT NULL
+            kategori TEXT,
+            harga FLOAT,
+            satuan TEXT,
+            stok INT
         )
     """
     )
@@ -32,7 +31,7 @@ def init_db():
         """
         CREATE TABLE IF NOT EXISTS transaksi(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            kode_produk TEXT NOT NULL,
+            barcode_transaksi INT NOT NULL,
             jumlah INTEGER NOT NULL,
             total_harga FLOAT NOT NULL,
             tanggal DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -40,7 +39,7 @@ def init_db():
             kasir TEXT,
             metode_pembayaran TEXT,
             keterangan TEXT,
-            FOREIGN KEY (kode_produk) REFERENCES produk(kode) ON DELETE CASCADE
+            FOREIGN KEY (barcode_transaksi) REFERENCES produk(kode_barcode) ON DELETE CASCADE
         )
     """
     )
