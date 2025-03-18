@@ -2,19 +2,48 @@ import sqlite3
 from db import get_connection
 from utils import clear_screen
 from tabulate import tabulate
+from tambah_barcode import tambah_barcode
+from cari_barcode import cari_barcode
 
 def tambah_produk():
-    # Tambah produk secara manual 
-    print("\n + TAMBAH PRODUK")
-    nama = input("\nNama produk: ")
-    kode_barcode = input("Kode Barcode: ")
+    clear_screen()
+    print("1. Scan Barcode")
+    print("2. Input Manual")
+    pilihan = input("Pilih Metode: ")
+
+    if pilihan == "1":
+        # Panggil fungsi scan_barcode untuk mendapatkan kode barcode
+        kode_barcode = tambah_barcode()
+        if kode_barcode is None:
+            print("Tidak ada barcode yang terdeteksi atau barcode sudah ada di database.")
+            return
+    elif pilihan == "2":
+        # Input kode barcode secara manual
+        kode_barcode = input("Masukkan Kode Barcode: ")
+        # Cek apakah kode barcode sudah ada di database
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM produk WHERE kode_barcode = ?", (kode_barcode,))
+        if cursor.fetchone():
+            print("Produk dengan kode barcode tersebut sudah ada.")
+            conn.close()
+            return
+        conn.close()
+    else:
+        print("Pilihan tidak valid.")
+        return
+
+    # Input data pelengkap secara manual
+    print("\n + TAMBAH PRODUK BARU")
+    nama = input("Nama produk: ")
     kategori = input("Kategori Produk: ")
     harga_modal = float(input("Harga modal: "))
     harga_jual = float(input("Harga jual: "))
     satuan = input("Satuan produk: ")
-    stok = input("Stok produk: ")
+    stok = int(input("Stok produk: "))
 
-    conn = sqlite3.connect("kasir.db")
+    # Tambahkan produk ke database
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
         "INSERT INTO produk (kode_barcode, nama, kategori, harga_modal, harga_jual, satuan, stok) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -23,7 +52,6 @@ def tambah_produk():
     conn.commit()
     conn.close()
     print("\n ✅ Produk baru berhasil ditambahkan!")
-
 
 def lihat_produk():
     clear_screen()
@@ -47,10 +75,20 @@ def lihat_produk():
     else:
         print(" ⚠️ Tidak ada produk dalam database.")
 
-
 def cari_produk():
-    clear_screen()
-    keyword = input("\nMasukkan nama, merk, atau kode produk yang ingin dicari: ")
+    print("1. Cari dengan Barcode")
+    print("2. Cari Manual")
+    mode = input("Pilih metode: ")
+    if mode == "1":
+        keyword = cari_barcode()
+        if not keyword:
+            print("Tidak ada barcode yang terdeteksi.")
+            return
+    elif mode == "2":
+        keyword = input("\nMasukkan nama, kategori, atau kode barcode: ")
+    else:
+        print("Mode tidak valid.")
+        return
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -72,8 +110,6 @@ def cari_produk():
                 stralign="center"
             )
         )
-    else:
-        print("\n❌ Produk tidak ditemukan.")
 
 
 def edit_produk():
